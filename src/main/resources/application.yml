@@ -1,0 +1,20 @@
+server:
+  port: 5000
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/fundus?useSSL=false&serverTimezone=UTC
+    username: root
+    password: hgy7777777
+
+
+path:
+  img: "/Users/hgy/Desktop/server/images" # 配置图片所在路径
+  info: "./info"  # 配置标签文件的路径
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
