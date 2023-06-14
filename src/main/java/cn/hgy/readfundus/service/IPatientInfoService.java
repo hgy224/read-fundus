@@ -5,4 +5,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 public interface IPatientInfoService extends IService<PatientInfo> {
     Integer getIdByDatasetPatient(Integer datasetId, String patientId);
+
+    boolean update(String gpt, Integer datasetId, String patientId);
 }

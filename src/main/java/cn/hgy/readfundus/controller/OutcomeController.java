@@ -4,20 +4,28 @@ import cn.hgy.readfundus.common.ResourcePath;
 import cn.hgy.readfundus.common.Result;
 import cn.hgy.readfundus.dto.DoctorReadDTO;
 import cn.hgy.readfundus.dto.InfoDTO;
+import cn.hgy.readfundus.dto.OutcomeDTO;
 import cn.hgy.readfundus.entity.DoctorRead;
+import cn.hgy.readfundus.entity.FundusDataset;
 import cn.hgy.readfundus.entity.Outcome;
 import cn.hgy.readfundus.service.IDoctorReadService;
+import cn.hgy.readfundus.service.IFundusDatasetService;
 import cn.hgy.readfundus.service.IOutcomeService;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.csv.CsvUtil;
+import cn.hutool.core.text.csv.CsvWriter;
+import cn.hutool.core.util.CharsetUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/outcome")
@@ -30,6 +38,9 @@ public class OutcomeController {
 
     @Resource
     private IOutcomeService outcomeService;
+
+    @Resource
+    private IFundusDatasetService fundusDatasetService;
 
     @GetMapping("/info/{readId}")
     public Result<InfoDTO> read(@PathVariable Integer readId){
@@ -79,12 +90,31 @@ public class OutcomeController {
     }
 
     @GetMapping("/get/{readId}")
-    public void getOutcome(@PathVariable Integer readId){
+    public Result<String> getOutcome(@PathVariable Integer readId){
+        // 获取医生名字
         DoctorRead read = doctorReadService.getById(readId);
+        // 获取数据集名字
+        FundusDataset dataset = fundusDatasetService.getById(read.getDatasetId());
+        // 生成保存结果的文件名字
+        String outcomeFileName = dataset.getDatasetName() + "_" + read.getDoctorName() + ".csv";
+        String path = Paths.get(resourcePath.getOutcome(), outcomeFileName).toString();
+        File file = new File(path);
 
-
+        // 查询结果
         LambdaQueryWrapper<Outcome> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Outcome::getReadId, readId);
         List<Outcome> list = outcomeService.list(queryWrapper);
+        // 保存要写入文件的结果
+        List<OutcomeDTO> outcomes = list.stream()
+                .map(outcome ->
+                        BeanUtil.copyProperties(outcome, OutcomeDTO.class))
+                .collect(Collectors.toList());
+        if (file.getParentFile().exists() || file.getParentFile().mkdirs()) {
+            CsvWriter writer = CsvUtil.getWriter(file, CharsetUtil.CHARSET_UTF_8);
+            writer.writeBeans(outcomes);
+            writer.close();
+            return Result.success("保存到了"+path);
+        }
+        return Result.error("保存结果失败!");
     }
 }

@@ -13,4 +13,6 @@ public class ResourcePath {
 
     // 信息文件所在位置
     private String info;
+
+    private String outcome;
 }

@@ -1,9 +1,11 @@
 ```shell
 DELETE   http://localhost:5001/doctor/delete/1  # 删除readId为1的记录
 PUT      http://localhost:5001/dataset/add/data # 添加对应的数据集
-nohup java -jar read-fundus-0.0.1-SNAPSHOT.jar > log.log 2>&1 &
+PUT      http://localhost:5001/dataset/gpt/data # 添加对应的gpt
+nohup java -jar read-fundus-0.0.1-SNAPSHOT.jar --path.img=./images > log.log 2>&1 &
 
-http://101.43.32.24/doctor/delete/1
+http://101.43.32.24:5000/doctor/delete/1
+http://101.43.32.24:5000/dataset/gpt/data
 ```
 
 
@@ -15,7 +17,7 @@ http://101.43.32.24/doctor/delete/1
 |       id       |                          |
 |  dataset_name  |                          |
 |   info_file    | 存储图片名字和meta的文件 |
-|      num       |   有多少人或眼睛或图片   |
+|      num       | file有几行，代表几个单位 |
 |      type      | 0：图片，1：眼睛，2：人  |
 |     state      |   0表示下线，1表示上线   |
 

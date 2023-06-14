@@ -59,9 +59,7 @@ public class DoctorReadController {
     @DeleteMapping("/delete/{readId}")
     public Result<String> delete(@PathVariable Integer readId){
         // 删除doctor_read中的记录
-        ;
         // 删除outcome中和readId相关的结果
-        ;
         if (doctorReadService.removeById(readId) && outcomeService.remove(readId)){
             return Result.success("删除成功!");
         }

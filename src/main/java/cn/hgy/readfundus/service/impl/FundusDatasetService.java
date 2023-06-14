@@ -2,16 +2,15 @@ package cn.hgy.readfundus.service.impl;
 
 import cn.hgy.readfundus.aggregates.PatientRich;
 import cn.hgy.readfundus.common.ResourcePath;
-import cn.hgy.readfundus.dto.FundusDatasetDTO;
 import cn.hgy.readfundus.entity.FundusDataset;
 import cn.hgy.readfundus.entity.Patient;
 import cn.hgy.readfundus.entity.PatientInfo;
 import cn.hgy.readfundus.mapper.FundusDatasetMapper;
 import cn.hgy.readfundus.service.IFundusDatasetService;
-import cn.hutool.core.bean.BeanUtil;
+import cn.hgy.readfundus.service.IPatientInfoService;
+import cn.hgy.readfundus.service.IPatientService;
 import cn.hutool.core.text.csv.CsvData;
 import cn.hutool.core.text.csv.CsvReader;
-import cn.hutool.core.text.csv.CsvRow;
 import cn.hutool.core.text.csv.CsvUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -23,9 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,10 +35,10 @@ public class FundusDatasetService extends ServiceImpl<FundusDatasetMapper, Fundu
     private ResourcePath resourcePath;
 
     @Resource
-    private PatientService patientService;
+    private IPatientService patientService;
 
     @Resource
-    private PatientInfoService patientInfoService;
+    private IPatientInfoService patientInfoService;
 
     /**
      * 查询state=1的dataset
@@ -118,5 +115,22 @@ public class FundusDatasetService extends ServiceImpl<FundusDatasetMapper, Fundu
         updateWrapper.eq(FundusDataset::getDatasetName, datasetName);
         updateWrapper.set(FundusDataset::getState, 1);
         return update(updateWrapper);
+    }
+
+    @Override
+    public boolean addGpt(String datasetName, String fileName) {
+        assert fileName.endsWith(".csv"):"信息文件应为csv文件";
+        // 获取数据集的id
+        FundusDataset dataset = getByName(datasetName);
+        String path = Paths.get(resourcePath.getInfo(), fileName).toString();
+        File infoFile = new File(path);
+        if (infoFile.exists()){
+            CsvReader reader = CsvUtil.getReader();
+            reader.setContainsHeader(true);
+            CsvData data = reader.read(infoFile, StandardCharsets.UTF_8);
+            // 遍历gpt建议存入数据库
+            data.getRows().forEach(row -> patientInfoService.update(row.get(1), dataset.getId(), row.get(0)));
+        }
+        return true;
     }
 }
