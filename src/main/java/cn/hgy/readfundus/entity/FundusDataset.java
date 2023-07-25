@@ -25,6 +25,8 @@ public class FundusDataset {
     // 数据集的状态  0: 不能用  1: 可用
     private Integer state;
 
+    private Integer password;
+
     public FundusDataset(String datasetName, String infoFile, Integer type, Integer num) {
         this.datasetName = datasetName;
         this.infoFile = infoFile;

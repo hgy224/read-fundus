@@ -10,4 +10,6 @@ import java.util.List;
 public interface IPatientService extends IService<Patient> {
     List<Patient> list(Integer datasetId);
     PatientRich getPatientInfo(CsvRow row);
+
+    PatientRich getPatient(CsvRow row);
 }

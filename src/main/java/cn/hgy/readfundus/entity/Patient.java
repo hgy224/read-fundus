@@ -13,4 +13,5 @@ public class Patient {
     private Integer imageNum;
     // meta信息id
     private Integer infoId;
+    private String info;
 }

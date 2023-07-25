@@ -1,6 +1,7 @@
 package cn.hgy.readfundus.service;
 
 import cn.hgy.readfundus.dto.InfoDTO;
+import cn.hgy.readfundus.dto.InfoLabelDTO;
 import cn.hgy.readfundus.entity.DoctorRead;
 import cn.hgy.readfundus.entity.Outcome;
 import cn.hgy.readfundus.entity.Patient;
@@ -12,6 +13,8 @@ public interface IOutcomeService extends IService<Outcome> {
     boolean bindPatients(List<Patient> patients, Integer readId);
 
     InfoDTO getPatient(DoctorRead read);
+
+    InfoLabelDTO getPatientLabel(DoctorRead read);
 
     boolean updateChoose(Outcome outcome);
 

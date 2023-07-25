@@ -7,10 +7,16 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/fundus?useSSL=false&serverTimezone=UTC
     username: root
     password: hgy7777777
-
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: hgy777
+      database: 0
 
 path:
-  img: "/Users/hgy/Desktop/server/images" # 配置图片所在路径
+#  img: "/Users/hgy/Desktop/server/images" # 配置图片所在路径
+  img: "./images"
   info: "./info"  # 配置标签文件的路径
   outcome: "./outcome"  # 结果存储路径
 mybatis-plus:

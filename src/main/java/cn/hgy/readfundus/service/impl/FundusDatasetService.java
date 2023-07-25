@@ -43,9 +43,9 @@ public class FundusDatasetService extends ServiceImpl<FundusDatasetMapper, Fundu
     /**
      * 查询state=1的dataset
      */
-    public List<FundusDataset> usedList() {
+    public List<FundusDataset> usedList(int state) {
         LambdaQueryWrapper<FundusDataset> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(FundusDataset::getState, 1);
+        queryWrapper.eq(FundusDataset::getState, state);
         return this.list(queryWrapper);
     }
 
@@ -65,9 +65,16 @@ public class FundusDatasetService extends ServiceImpl<FundusDatasetMapper, Fundu
             int num = data.getRowCount();
 
             // 从文件中读取每一行到对象中  dataset_id info_id需要填充
-            List<PatientRich> patients = data.getRows().stream()
-                    .map(patientService::getPatientInfo)
-                    .collect(Collectors.toList());
+            List<PatientRich> patients = null;
+            if (type==2){
+                patients = data.getRows().stream()
+                        .map(patientService::getPatientInfo)
+                        .collect(Collectors.toList());
+            }else if (type == 1){
+                patients = data.getRows().stream().map(patientService::getPatient)
+                        .collect(Collectors.toList());
+            }
+
             // 要插入的一个数据集
             FundusDataset fundusDataset = new FundusDataset(datasetName, fileName, type, num);
             if (!save(fundusDataset)){
@@ -75,10 +82,16 @@ public class FundusDatasetService extends ServiceImpl<FundusDatasetMapper, Fundu
             }
             Integer datasetId = getByName(datasetName).getId();
             // 填充dataset_id
+            assert patients != null;
             patients.forEach(patientRich -> {
                 patientRich.getPatient().setDatasetId(datasetId);
-                patientRich.getPatientInfo().setDatasetId(datasetId);});
+                if (patientRich.getPatientInfo()!=null){
+                    patientRich.getPatientInfo().setDatasetId(datasetId);
+                }});
 
+            if (type==1){
+                return patientService.saveBatch(patients.stream().map(PatientRich::getPatient).collect(Collectors.toList()));
+            }
             // 保存这个数据集所有患者的信息 patientInfo
             List<PatientInfo> patientInfos = patients.stream()
                     .map(PatientRich::getPatientInfo).collect(Collectors.toList());
